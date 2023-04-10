@@ -5,12 +5,12 @@
 </template>
 <script>
 export default {
-  
+
 };
 </script>
 <style>
 #app {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-weight: 400;
   color: #222;
 }
