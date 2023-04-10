@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.overview {
+    font-size: 12px;
+}
+
+.name {
+    color: #285c93;
+}
+
+td {
+    padding: 10px 15px !important;
+}
+
+.limit {
+    font-size: 12px;
+}
+
+.limit b {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.price {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.price span {
+    font-size: 12px;
+}
+
+.buy {
+    color: #0ECB81;
+}
+
+.sell {
+    color: #f6465d;
+}
