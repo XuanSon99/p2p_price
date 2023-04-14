@@ -2,7 +2,7 @@
   <main>
     <v-container class="mt-3">
       <v-row>
-        <v-col cols="6">
+        <v-col cols="12" lg="6">
           <v-card>
             <v-card-title class="pb-0">
               <span class="buy">Mua</span>
@@ -48,7 +48,7 @@
             </v-data-table>
           </v-card>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="12" lg="6">
           <v-card>
             <v-card-title class="pb-0">
               <span class="sell">Bán</span>
