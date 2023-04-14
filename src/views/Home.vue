@@ -40,7 +40,7 @@
                 </div>
               </template>
               <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0,2)" :key="index"
+                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0, 2)" :key="index"
                   :style="{ color: method.tradeMethodBgColor }">
                   {{ method.tradeMethodName }}
                 </div>
@@ -86,7 +86,7 @@
                 </div>
               </template>
               <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0,2)" :key="index"
+                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0, 2)" :key="index"
                   :style="{ color: method.tradeMethodBgColor }">
                   {{ method.tradeMethodName }}
                 </div>
@@ -96,15 +96,16 @@
         </v-col>
       </v-row>
       <div class="d-flex justify-center mt-5">
-        <v-btn class="primary" width="150">
-          Làm mới:
+        <!-- <v-card class="d-flex align-center justify-center" width="180">
+          <v-checkbox v-model="is_refresh"></v-checkbox>
+          <span class="mr-1">Làm mới sau</span>
           <span v-if="refresh == 0">
-            <v-progress-circular :width="3" :size="13" color="white" indeterminate></v-progress-circular>
+            <v-progress-circular :width="3" :size="13" color="blue" indeterminate></v-progress-circular>
           </span>
-          <span v-else>{{ refresh }}</span>
-        </v-btn>
+          <span v-else>{{ refresh }}s</span>
+        </v-card> -->
+        <v-btn class="primary" @click="refreshHandle">Làm mới</v-btn>
       </div>
-
     </v-container>
   </main>
 </template>
@@ -129,30 +130,34 @@ export default {
       sell_data: [],
       buy_top: [],
       sell_top: [],
-      refresh: 5,
+      refresh: 10,
+      is_refresh: false,
       totalItems: 99,
       page: {
         buy: 1,
         sell: 1
-      }
+      },
+      setInter: ""
     }
   },
   mounted() {
     this.getBuyPrice()
     this.getSellPrice()
     setInterval(() => {
-      this.getBuyPrice()
-      this.getSellPrice()
-    }, 6000);
-    setInterval(() => {
       if (this.refresh == 0) {
-        this.refresh = 5
+        this.refresh = 10
         return
       }
       this.refresh = this.refresh - 1
     }, 1000);
   },
   methods: {
+    refreshHandle() {
+      this.buy_data = []
+      this.sell_data = []
+      this.getBuyPrice()
+      this.getSellPrice()
+    },
     getBuyPrice() {
       this.CallAPI("get", `p2p?type=buy&asset=usdt&fiat=vnd&transAmount=${this.buy_search}&page=${this.page.buy}`, {}, (res) => {
         this.buy_data = res.data.data
@@ -184,6 +189,17 @@ export default {
     },
     "page.sell"() {
       this.getSellPrice()
+    },
+    is_refresh() {
+      if (this.is_refresh) {
+        this.refresh = 10
+        this.setInter = setInterval(() => {
+          this.getBuyPrice()
+          this.getSellPrice()
+        }, 11000);
+        return
+      }
+      clearInterval(this.setInter)
     }
   }
 };
