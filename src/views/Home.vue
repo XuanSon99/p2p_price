@@ -5,16 +5,15 @@
         <v-col cols="6">
           <v-card>
             <v-card-title class="pb-0">
-              <span class="buy">Buy Market</span>
+              <span class="buy">Mua</span>
               <v-spacer></v-spacer>
               <div class="d-flex">
-                <v-text-field v-model="buy_search" append-icon="mdi-magnify" label="Search"></v-text-field>
-                <!-- <v-btn class="mt-3" text icon color="blue" @click="getPrice">
-                  <v-icon>mdi-magnify</v-icon>
-                </v-btn> -->
+                <v-text-field v-model="buy_search" append-icon="mdi-magnify" label="Số lượng"></v-text-field>
               </div>
             </v-card-title>
-            <v-data-table :headers="headers" :items="buy_data" :hide-default-footer="true">
+            <v-data-table :headers="headers" :items="buy_data" :items-per-page="9"
+              :footer-props="{ 'items-per-page-options': [9, 9] }" :page.sync="page.buy"
+              :server-items-length="totalItems">
               <template v-slot:[`item.name`]="{ item }">
                 <div class="align-center d-flex name mb-1">
                   <span class="mr-1">{{ item.advertiser.nickName }}</span>
@@ -41,7 +40,7 @@
                 </div>
               </template>
               <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods" :key="index"
+                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0,2)" :key="index"
                   :style="{ color: method.tradeMethodBgColor }">
                   {{ method.tradeMethodName }}
                 </div>
@@ -52,16 +51,15 @@
         <v-col cols="6">
           <v-card>
             <v-card-title class="pb-0">
-              <span class="sell">Sell Market</span>
+              <span class="sell">Bán</span>
               <v-spacer></v-spacer>
               <div class="d-flex">
-                <v-text-field v-model="sell_search" append-icon="mdi-magnify" label="Search"></v-text-field>
-                <!-- <v-btn class="mt-3" text icon color="blue" @click="getPrice">
-                  <v-icon>mdi-magnify</v-icon>
-                </v-btn> -->
+                <v-text-field v-model="sell_search" append-icon="mdi-magnify" label="Số lượng"></v-text-field>
               </div>
             </v-card-title>
-            <v-data-table :headers="headers" :items="sell_data" :hide-default-footer="true">
+            <v-data-table :headers="headers" :items="sell_data" :items-per-page="9"
+              :footer-props="{ 'items-per-page-options': [9, 9] }" :page.sync="page.sell"
+              :server-items-length="totalItems">
               <template v-slot:[`item.name`]="{ item }">
                 <div class="align-center d-flex name mb-1">
                   <span class="mr-1">{{ item.advertiser.nickName }}</span>
@@ -88,83 +86,7 @@
                 </div>
               </template>
               <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods" :key="index"
-                  :style="{ color: method.tradeMethodBgColor }">
-                  {{ method.tradeMethodName }}
-                </div>
-              </template>
-            </v-data-table>
-          </v-card>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="6">
-          <v-card>
-            <v-data-table :headers="headers" :items="buy_top" :hide-default-footer="true" :hide-default-header="true">
-              <template v-slot:[`item.name`]="{ item }">
-                <div class="align-center d-flex name mb-1">
-                  <span class="mr-1">{{ item.advertiser.nickName }}</span>
-                  <img src="/img/authentication_icon.svg" alt="" v-if="item.adv.classify == 'profession'">
-                </div>
-                <div class="overview">
-                  <span class="mr-2">{{ formatVNPrice(item.advertiser.monthOrderCount) }} lệnh</span>
-                  <span>{{ toFixedValue(item.advertiser.monthFinishRate * 100) }}% hoàn tất</span>
-                </div>
-              </template>
-              <template v-slot:[`item.price`]="{ item }">
-                <div class="price">{{ formatVNPrice(item.adv.price) }} <span>VND</span></div>
-              </template>
-              <template v-slot:[`item.limit`]="{ item }">
-                <div class="limit">
-                  <div class="mb-1">Khả dụng: <b>{{ formatPrice(item.adv.tradableQuantity) }} USDT</b></div>
-                  <div>
-                    <span>Giới hạn: <b>₫{{ formatPrice(item.adv.minSingleTransAmount) }}</b></span>
-                    -
-                    <span>
-                      <b>₫{{ formatPrice(item.adv.dynamicMaxSingleTransAmount) }}</b>
-                    </span>
-                  </div>
-                </div>
-              </template>
-              <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods" :key="index"
-                  :style="{ color: method.tradeMethodBgColor }">
-                  {{ method.tradeMethodName }}
-                </div>
-              </template>
-            </v-data-table>
-          </v-card>
-        </v-col>
-        <v-col cols="6">
-          <v-card>
-            <v-data-table :headers="headers" :items="sell_top" :hide-default-footer="true" :hide-default-header="true">
-              <template v-slot:[`item.name`]="{ item }">
-                <div class="align-center d-flex name mb-1">
-                  <span class="mr-1">{{ item.advertiser.nickName }}</span>
-                  <img src="/img/authentication_icon.svg" alt="" v-if="item.adv.classify == 'profession'">
-                </div>
-                <div class="overview">
-                  <span class="mr-2">{{ formatVNPrice(item.advertiser.monthOrderCount) }} lệnh</span>
-                  <span>{{ toFixedValue(item.advertiser.monthFinishRate * 100) }}% hoàn tất</span>
-                </div>
-              </template>
-              <template v-slot:[`item.price`]="{ item }">
-                <div class="price">{{ formatVNPrice(item.adv.price) }} <span>VND</span></div>
-              </template>
-              <template v-slot:[`item.limit`]="{ item }">
-                <div class="limit">
-                  <div class="mb-1">Khả dụng: <b>{{ formatPrice(item.adv.tradableQuantity) }} USDT</b></div>
-                  <div>
-                    <span>Giới hạn: <b>₫{{ formatPrice(item.adv.minSingleTransAmount) }}</b></span>
-                    -
-                    <span>
-                      <b>₫{{ formatPrice(item.adv.dynamicMaxSingleTransAmount) }}</b>
-                    </span>
-                  </div>
-                </div>
-              </template>
-              <template v-slot:[`item.payments`]="{ item }">
-                <div class="payments" v-for="(method, index) in item.adv.tradeMethods" :key="index"
+                <div class="payments" v-for="(method, index) in item.adv.tradeMethods.slice(0,2)" :key="index"
                   :style="{ color: method.tradeMethodBgColor }">
                   {{ method.tradeMethodName }}
                 </div>
@@ -175,7 +97,7 @@
       </v-row>
       <div class="d-flex justify-center mt-5">
         <v-btn class="primary" width="150">
-          Refresh:
+          Làm mới:
           <span v-if="refresh == 0">
             <v-progress-circular :width="3" :size="13" color="white" indeterminate></v-progress-circular>
           </span>
@@ -201,19 +123,26 @@ export default {
         { text: 'Giới hạn/Khả dụng', value: 'limit', sortable: false },
         { text: 'Thanh toán', value: 'payments', sortable: false },
       ],
-      buy_search: 1000000,
+      buy_search: "",
       buy_data: [],
-      sell_search: 1000000,
+      sell_search: "",
       sell_data: [],
       buy_top: [],
       sell_top: [],
-      refresh: 5
+      refresh: 5,
+      totalItems: 99,
+      page: {
+        buy: 1,
+        sell: 1
+      }
     }
   },
   mounted() {
-    this.getPrice()
+    this.getBuyPrice()
+    this.getSellPrice()
     setInterval(() => {
-      this.getPrice()
+      this.getBuyPrice()
+      this.getSellPrice()
     }, 6000);
     setInterval(() => {
       if (this.refresh == 0) {
@@ -224,18 +153,14 @@ export default {
     }, 1000);
   },
   methods: {
-    getPrice() {
-      this.CallAPI("get", "p2p?type=buy&asset=usdt&fiat=vnd&transAmount=" + this.buy_search, {}, (res) => {
+    getBuyPrice() {
+      this.CallAPI("get", `p2p?type=buy&asset=usdt&fiat=vnd&transAmount=${this.buy_search}&page=${this.page.buy}`, {}, (res) => {
         this.buy_data = res.data.data
       })
-      this.CallAPI("get", "p2p?type=sell&asset=usdt&fiat=vnd&transAmount=" + this.sell_search, {}, (res) => {
+    },
+    getSellPrice() {
+      this.CallAPI("get", `p2p?type=sell&asset=usdt&fiat=vnd&transAmount=${this.sell_search}&page=${this.page.sell}`, {}, (res) => {
         this.sell_data = res.data.data
-      })
-      this.CallAPI("get", "p2p?type=buy&asset=usdt&fiat=vnd", {}, (res) => {
-        this.buy_top = res.data.data.slice(0, 4)
-      })
-      this.CallAPI("get", "p2p?type=sell&asset=usdt&fiat=vnd", {}, (res) => {
-        this.sell_top = res.data.data.slice(0, 4)
       })
     },
     formatVNPrice(value) {
@@ -253,6 +178,13 @@ export default {
       return value.toFixed(2)
     }
   },
-
+  watch: {
+    "page.buy"() {
+      this.getBuyPrice()
+    },
+    "page.sell"() {
+      this.getSellPrice()
+    }
+  }
 };
 </script>
