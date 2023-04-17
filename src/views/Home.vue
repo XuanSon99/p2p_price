@@ -95,16 +95,16 @@
           </v-card>
         </v-col>
       </v-row>
-      <div class="d-flex justify-center mt-5">
-        <!-- <v-card class="d-flex align-center justify-center" width="180">
+      <div class="d-flex justify-center align-center mt-5">
+        <v-btn class="primary mr-3" @click="refreshHandle">Làm mới</v-btn>
+        <v-card class="d-flex align-center justify-center" width="180">
           <v-checkbox v-model="is_refresh"></v-checkbox>
           <span class="mr-1">Làm mới sau</span>
           <span v-if="refresh == 0">
             <v-progress-circular :width="3" :size="13" color="blue" indeterminate></v-progress-circular>
           </span>
           <span v-else>{{ refresh }}s</span>
-        </v-card> -->
-        <v-btn class="primary" @click="refreshHandle">Làm mới</v-btn>
+        </v-card>
       </div>
     </v-container>
   </main>
