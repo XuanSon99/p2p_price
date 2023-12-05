@@ -7,12 +7,10 @@
             <v-card-title class="pb-0">
               <span class="buy">Mua</span>
               <v-spacer></v-spacer>
-              <div class="d-flex">
-                <v-text-field v-model="buy_search" append-icon="mdi-magnify" label="Số lượng"></v-text-field>
-              </div>
+              <div class="averate">Giá TB: ({{ formatVNPrice(buy_price) }} + {{ formatVNPrice(sell_price) }}) / 2 = {{ averageRate }}</div>
             </v-card-title>
-            <v-data-table :headers="headers" :items="buy_data" :items-per-page="9"
-              :footer-props="{ 'items-per-page-options': [9, 9] }" :page.sync="page.buy"
+            <v-data-table :headers="headers" :items="buy_data" :items-per-page="20"
+              :footer-props="{ 'items-per-page-options': [20, 20] }" :page.sync="page.buy"
               :server-items-length="totalItems">
               <template v-slot:[`item.name`]="{ item }">
                 <div class="align-center d-flex name mb-1">
@@ -25,7 +23,8 @@
                 </div>
               </template>
               <template v-slot:[`item.price`]="{ item }">
-                <div class="price">{{ formatVNPrice(item.adv.price) }} <span>VND</span></div>
+                <div class="price" @click="buy_price = item.adv.price">{{ formatVNPrice(item.adv.price) }}
+                  <span>VND</span></div>
               </template>
               <template v-slot:[`item.limit`]="{ item }">
                 <div class="limit">
@@ -53,12 +52,10 @@
             <v-card-title class="pb-0">
               <span class="sell">Bán</span>
               <v-spacer></v-spacer>
-              <div class="d-flex">
-                <v-text-field v-model="sell_search" append-icon="mdi-magnify" label="Số lượng"></v-text-field>
-              </div>
+              <div class="averate">Số dư: {{ balance }}</div>
             </v-card-title>
-            <v-data-table :headers="headers" :items="sell_data" :items-per-page="9"
-              :footer-props="{ 'items-per-page-options': [9, 9] }" :page.sync="page.sell"
+            <v-data-table :headers="headers" :items="sell_data" :items-per-page="20"
+              :footer-props="{ 'items-per-page-options': [20, 20] }" :page.sync="page.sell"
               :server-items-length="totalItems">
               <template v-slot:[`item.name`]="{ item }">
                 <div class="align-center d-flex name mb-1">
@@ -71,7 +68,8 @@
                 </div>
               </template>
               <template v-slot:[`item.price`]="{ item }">
-                <div class="price">{{ formatVNPrice(item.adv.price) }} <span>VND</span></div>
+                <div class="price" @click="sell_price = item.adv.price">{{ formatVNPrice(item.adv.price) }}
+                  <span>VND</span></div>
               </template>
               <template v-slot:[`item.limit`]="{ item }">
                 <div class="limit">
@@ -95,7 +93,7 @@
           </v-card>
         </v-col>
       </v-row>
-      <div class="d-flex justify-center align-center mt-5">
+      <!-- <div class="d-flex justify-center align-center mt-5">
         <v-btn class="primary mr-3" @click="refreshHandle">Làm mới</v-btn>
         <v-card class="d-flex align-center justify-center" width="180">
           <v-checkbox v-model="is_refresh"></v-checkbox>
@@ -105,12 +103,13 @@
           </span>
           <span v-else>{{ refresh }}s</span>
         </v-card>
-      </div>
+      </div> -->
     </v-container>
   </main>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data() {
     return {
@@ -137,34 +136,63 @@ export default {
         buy: 1,
         sell: 1
       },
-      setInter: ""
+      setInter: "",
+      buy_price: 0,
+      sell_price: 0,
+      balance: 0
+    }
+  },
+  computed: {
+    averageRate(){
+      return this.formatVNPrice(Math.round((Number(this.buy_price) + Number(this.sell_price)) / 2))
     }
   },
   mounted() {
     this.getBuyPrice()
     this.getSellPrice()
+    this.getBalance()
     setInterval(() => {
-      if (this.refresh == 0) {
-        this.refresh = 10
-        return
-      }
-      this.refresh = this.refresh - 1
-    }, 1000);
-  },
-  methods: {
-    refreshHandle() {
-      this.buy_data = []
-      this.sell_data = []
       this.getBuyPrice()
       this.getSellPrice()
+    }, 5000);
+    setInterval(() => {
+      this.getBalance()
+    }, 30000);
+  },
+  methods: {
+    getBalance(){
+      axios.get("https://apilist.tronscan.org/api/account?address=TLd1GNEvc3f3av3Q6vPNS6KARbdA5ge5tQ").then((res)=>{
+        let a = res.data.trc20token_balances.filter((i) => i.tokenId == "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
+        this.balance = this.formatVNPrice(Math.round(parseFloat(a[0].balance)*Math.pow(10, -6)))
+      })
     },
     getBuyPrice() {
-      this.CallAPI("get", `p2p?type=buy&asset=usdt&fiat=vnd&transAmount=${this.buy_search}&page=${this.page.buy}`, {}, (res) => {
+      let params = `bapi/c2c/v2/friendly/c2c/adv/search`
+      let data = {
+        asset: 'USDT',
+        fiat: 'VND',
+        page: this.page.buy,
+        rows: 20,
+        tradeType: 'BUY',
+        merchantCheck: true,
+        publisherType: null,
+      }
+      this.CallAPI("post", params, data, (res) => {
         this.buy_data = res.data.data
       })
     },
     getSellPrice() {
-      this.CallAPI("get", `p2p?type=sell&asset=usdt&fiat=vnd&transAmount=${this.sell_search}&page=${this.page.sell}`, {}, (res) => {
+      let params = `bapi/c2c/v2/friendly/c2c/adv/search`
+      let data = {
+        asset: 'USDT',
+        fiat: 'VND',
+        page: this.page.sell,
+        rows: 20,
+        tradeType: 'SELL',
+        merchantCheck: true,
+        publisherType: null,
+      }
+      this.CallAPI("post", params, data, (res) => {
         this.sell_data = res.data.data
       })
     },
@@ -190,17 +218,6 @@ export default {
     "page.sell"() {
       this.getSellPrice()
     },
-    is_refresh() {
-      if (this.is_refresh) {
-        this.refresh = 10
-        this.setInter = setInterval(() => {
-          this.getBuyPrice()
-          this.getSellPrice()
-        }, 11000);
-        return
-      }
-      clearInterval(this.setInter)
-    }
   }
 };
 </script>

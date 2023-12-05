@@ -36,7 +36,7 @@ Vue.prototype.CallAPI = function (method, url, data, callResponse, callError) {
     },
   };
   const baseurl = process.env.VUE_APP_BASE_URL
-  const requestUrl = `${baseurl}/api/${url}`;
+  const requestUrl = `${baseurl}/${url}`;
   switch (method) {
     case "post":
       axios.post(requestUrl, data, config).then((response) => {
