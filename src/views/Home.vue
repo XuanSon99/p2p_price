@@ -153,7 +153,7 @@ export default {
   mounted() {
     this.getBuyPrice()
     this.getSellPrice()
-    // this.getBalance()
+    this.getBalance()
     setInterval(() => {
       this.getBuyPrice()
       this.getSellPrice()
@@ -170,67 +170,12 @@ export default {
       })
     },
     getBuyPrice() {
-      const config = {
-        headers: {
-          "Accept": "*/*",
-          "Accept-Encoding": "gzip, deflate, br",
-          "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive",
-          "Content-Length": "123",
-          "content-type": "application/json",
-          "Host": "p2p.binance.com",
-          "Origin": "https://p2p.binance.com",
-          "Pragma": "no-cache",
-          "TE": "Trailers",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0"
-        }
-      };
-      let params = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`
-      let data = {
-        asset: 'USDT',
-        fiat: 'VND',
-        page: this.page.buy,
-        rows: 20,
-        tradeType: 'BUY',
-        merchantCheck: true,
-        publisherType: null,
-      }
-      // this.CallAPI("post", params, data, (res) => {
-      //   this.buy_data = res.data.data
-      // })
-      axios.post(params, data, config).then((res) => {
+      this.CallAPI("get", `p2p?type=buy&asset=usdt&fiat=vnd&page=${this.page.buy}`, {}, (res) => {
         this.buy_data = res.data.data
       })
     },
     getSellPrice() {
-      const config = {
-        headers: {
-          "Accept": "*/*",
-          "Accept-Encoding": "gzip, deflate, br",
-          "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive",
-          "Content-Length": "123",
-          "content-type": "application/json",
-          "Host": "p2p.binance.com",
-          "Origin": "https://p2p.binance.com",
-          "Pragma": "no-cache",
-          "TE": "Trailers",
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0"
-        }
-      };
-      let params = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`
-      let data = {
-        asset: 'USDT',
-        fiat: 'VND',
-        page: this.page.sell,
-        rows: 20,
-        tradeType: 'SELL',
-        merchantCheck: true,
-        publisherType: null,
-      }
-      axios.post(params, data, config).then((res) => {
+      this.CallAPI("get", `p2p?type=sell&asset=usdt&fiat=vnd&page=${this.page.sell}`, {}, (res) => {
         this.sell_data = res.data.data
       })
     },
