@@ -7,7 +7,8 @@
             <v-card-title class="pb-0">
               <span class="buy">Mua</span>
               <v-spacer></v-spacer>
-              <div class="averate">Giá TB: ({{ formatVNPrice(buy_price) }} + {{ formatVNPrice(sell_price) }}) / 2 = {{ averageRate }}</div>
+              <div class="averate">Giá TB: ({{ formatVNPrice(buy_price) }} + {{ formatVNPrice(sell_price) }}) / 2 = {{
+                averageRate }}</div>
             </v-card-title>
             <v-data-table :headers="headers" :items="buy_data" :items-per-page="20"
               :footer-props="{ 'items-per-page-options': [20, 20] }" :page.sync="page.buy"
@@ -24,7 +25,8 @@
               </template>
               <template v-slot:[`item.price`]="{ item }">
                 <div class="price" @click="buy_price = item.adv.price">{{ formatVNPrice(item.adv.price) }}
-                  <span>VND</span></div>
+                  <span>VND</span>
+                </div>
               </template>
               <template v-slot:[`item.limit`]="{ item }">
                 <div class="limit">
@@ -69,7 +71,8 @@
               </template>
               <template v-slot:[`item.price`]="{ item }">
                 <div class="price" @click="sell_price = item.adv.price">{{ formatVNPrice(item.adv.price) }}
-                  <span>VND</span></div>
+                  <span>VND</span>
+                </div>
               </template>
               <template v-slot:[`item.limit`]="{ item }">
                 <div class="limit">
@@ -143,14 +146,14 @@ export default {
     }
   },
   computed: {
-    averageRate(){
+    averageRate() {
       return this.formatVNPrice(Math.round((Number(this.buy_price) + Number(this.sell_price)) / 2))
     }
   },
   mounted() {
     this.getBuyPrice()
     this.getSellPrice()
-    this.getBalance()
+    // this.getBalance()
     setInterval(() => {
       this.getBuyPrice()
       this.getSellPrice()
@@ -160,14 +163,30 @@ export default {
     }, 30000);
   },
   methods: {
-    getBalance(){
-      axios.get("https://apilist.tronscan.org/api/account?address=TLd1GNEvc3f3av3Q6vPNS6KARbdA5ge5tQ").then((res)=>{
+    getBalance() {
+      axios.get("https://apilist.tronscan.org/api/account?address=TLd1GNEvc3f3av3Q6vPNS6KARbdA5ge5tQ").then((res) => {
         let a = res.data.trc20token_balances.filter((i) => i.tokenId == "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
-        this.balance = this.formatVNPrice(Math.round(parseFloat(a[0].balance)*Math.pow(10, -6)))
+        this.balance = this.formatVNPrice(Math.round(parseFloat(a[0].balance) * Math.pow(10, -6)))
       })
     },
     getBuyPrice() {
-      let params = `bapi/c2c/v2/friendly/c2c/adv/search`
+      const config = {
+        headers: {
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+          "Content-Length": "123",
+          "content-type": "application/json",
+          "Host": "p2p.binance.com",
+          "Origin": "https://p2p.binance.com",
+          "Pragma": "no-cache",
+          "TE": "Trailers",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0"
+        }
+      };
+      let params = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`
       let data = {
         asset: 'USDT',
         fiat: 'VND',
@@ -177,12 +196,31 @@ export default {
         merchantCheck: true,
         publisherType: null,
       }
-      this.CallAPI("post", params, data, (res) => {
+      // this.CallAPI("post", params, data, (res) => {
+      //   this.buy_data = res.data.data
+      // })
+      axios.post(params, data, config).then((res) => {
         this.buy_data = res.data.data
       })
     },
     getSellPrice() {
-      let params = `bapi/c2c/v2/friendly/c2c/adv/search`
+      const config = {
+        headers: {
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+          "Content-Length": "123",
+          "content-type": "application/json",
+          "Host": "p2p.binance.com",
+          "Origin": "https://p2p.binance.com",
+          "Pragma": "no-cache",
+          "TE": "Trailers",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0"
+        }
+      };
+      let params = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`
       let data = {
         asset: 'USDT',
         fiat: 'VND',
@@ -192,7 +230,7 @@ export default {
         merchantCheck: true,
         publisherType: null,
       }
-      this.CallAPI("post", params, data, (res) => {
+      axios.post(params, data, config).then((res) => {
         this.sell_data = res.data.data
       })
     },
